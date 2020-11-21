@@ -1,0 +1,213 @@
+classdef CourseProject2 < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                        matlab.ui.Figure
+        CalculaterootsButton            matlab.ui.control.Button
+        ChooseamethodtosolveyoursystemDropDownLabel  matlab.ui.control.Label
+        ChooseamethodtosolveyoursystemDropDown  matlab.ui.control.DropDown
+        EditField                       matlab.ui.control.EditField
+        RootsTextAreaLabel              matlab.ui.control.Label
+        RootsTextArea                   matlab.ui.control.TextArea
+        EnteranaugmentedMatrixEditFieldLabel  matlab.ui.control.Label
+        EnteranaugmentedMatrixEditField  matlab.ui.control.EditField
+        CalculatemeanabsoluteerrorButton  matlab.ui.control.Button
+        ErrorTextAreaLabel              matlab.ui.control.Label
+        ErrorTextArea                   matlab.ui.control.TextArea
+        ChoosestoppingcriteriaDropDownLabel  matlab.ui.control.Label
+        ChoosestoppingcriteriaDropDown  matlab.ui.control.DropDown
+        OnlyforIterativeMethodsLabel    matlab.ui.control.Label
+        EntertolerancethresholdEditFieldLabel  matlab.ui.control.Label
+        EntertolerancethresholdEditField  matlab.ui.control.NumericEditField
+        EnterstartingapproximationEditFieldLabel  matlab.ui.control.Label
+        EnterstartingapproximationEditField  matlab.ui.control.EditField
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Value changed function: ChoosestoppingcriteriaDropDown
+        function ChoosestoppingcriteriaDropDownValueChanged(app, event)
+            value = app.ChoosestoppingcriteriaDropDown.Value;
+            if (strcmpi(value,'Mean absolute Error'))
+                flag = 1;
+            elseif (strcmpi(value,'Root mean square Error'))
+                flag = 2;
+            else
+                flag = 0;
+            end
+            setappdata(app.ChoosestoppingcriteriaDropDown,'flag',flag);
+        end
+
+        % Button pushed function: CalculaterootsButton
+        function CalculaterootsButtonPushed(app, event)
+            m1 = 'Gaussian direct Elimination';
+            m2 = 'Gauss-Seidel iterative method';
+            m3 = 'Jacobi iterative method'; 
+            value = app.ChooseamethodtosolveyoursystemDropDown.Value;
+            
+            A = app.EnteranaugmentedMatrixEditField.Value;
+            tolerance = app.EntertolerancethresholdEditField.Value;
+            x = app.EnterstartingapproximationEditField.Value;
+            flag = getappdata(app.ChoosestoppingcriteriaDropDown,'flag');
+            
+            if (strcmpi(value,m1))
+                val = Gaussian(A);
+                set(app.RootsTextArea,'Value',num2str(val));
+            elseif (strcmpi(value,m2))
+                val = GaussSeidel(A,x,tolerance,flag);
+                set(app.RootsTextArea,'Value',num2str(val));
+            elseif (strcmpi(value,m3))
+                val = Jacobi(A,x,tolerance,flag);
+                set(app.RootsTextArea,'Value',num2str(val));
+            end
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Color = [0.902 0.902 0.902];
+            app.UIFigure.Position = [100 100 766 584];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create CalculaterootsButton
+            app.CalculaterootsButton = uibutton(app.UIFigure, 'push');
+            app.CalculaterootsButton.ButtonPushedFcn = createCallbackFcn(app, @CalculaterootsButtonPushed, true);
+            app.CalculaterootsButton.Position = [359 199 100 22];
+            app.CalculaterootsButton.Text = 'Calculate roots';
+
+            % Create ChooseamethodtosolveyoursystemDropDownLabel
+            app.ChooseamethodtosolveyoursystemDropDownLabel = uilabel(app.UIFigure);
+            app.ChooseamethodtosolveyoursystemDropDownLabel.HorizontalAlignment = 'right';
+            app.ChooseamethodtosolveyoursystemDropDownLabel.Position = [179 442 216 22];
+            app.ChooseamethodtosolveyoursystemDropDownLabel.Text = 'Choose a method to solve your system';
+
+            % Create ChooseamethodtosolveyoursystemDropDown
+            app.ChooseamethodtosolveyoursystemDropDown = uidropdown(app.UIFigure);
+            app.ChooseamethodtosolveyoursystemDropDown.Items = {'Gaussian direct Elimination', 'Gauss-Seidel iterative method', 'Jacobi iterative method'};
+            app.ChooseamethodtosolveyoursystemDropDown.Position = [410 442 178 22];
+            app.ChooseamethodtosolveyoursystemDropDown.Value = 'Gaussian direct Elimination';
+
+            % Create EditField
+            app.EditField = uieditfield(app.UIFigure, 'text');
+            app.EditField.HorizontalAlignment = 'center';
+            app.EditField.FontSize = 18;
+            app.EditField.FontWeight = 'bold';
+            app.EditField.BackgroundColor = [0 1 1];
+            app.EditField.Position = [182 525 415 28];
+            app.EditField.Value = 'Solving Systems of Linear Equations';
+
+            % Create RootsTextAreaLabel
+            app.RootsTextAreaLabel = uilabel(app.UIFigure);
+            app.RootsTextAreaLabel.HorizontalAlignment = 'right';
+            app.RootsTextAreaLabel.Position = [251 163 35 22];
+            app.RootsTextAreaLabel.Text = 'Roots';
+
+            % Create RootsTextArea
+            app.RootsTextArea = uitextarea(app.UIFigure);
+            app.RootsTextArea.Editable = 'off';
+            app.RootsTextArea.Position = [300 127 217 60];
+
+            % Create EnteranaugmentedMatrixEditFieldLabel
+            app.EnteranaugmentedMatrixEditFieldLabel = uilabel(app.UIFigure);
+            app.EnteranaugmentedMatrixEditFieldLabel.HorizontalAlignment = 'right';
+            app.EnteranaugmentedMatrixEditFieldLabel.Position = [133 485 151 22];
+            app.EnteranaugmentedMatrixEditFieldLabel.Text = 'Enter an augmented Matrix';
+
+            % Create EnteranaugmentedMatrixEditField
+            app.EnteranaugmentedMatrixEditField = uieditfield(app.UIFigure, 'text');
+            app.EnteranaugmentedMatrixEditField.Position = [301 485 334 22];
+            app.EnteranaugmentedMatrixEditField.Value = '[3 1 -4 7;-2 3 1 -5;2 0 5 10]';
+
+            % Create CalculatemeanabsoluteerrorButton
+            app.CalculatemeanabsoluteerrorButton = uibutton(app.UIFigure, 'push');
+            app.CalculatemeanabsoluteerrorButton.Position = [320 90 177 22];
+            app.CalculatemeanabsoluteerrorButton.Text = 'Calculate mean absolute error';
+
+            % Create ErrorTextAreaLabel
+            app.ErrorTextAreaLabel = uilabel(app.UIFigure);
+            app.ErrorTextAreaLabel.HorizontalAlignment = 'right';
+            app.ErrorTextAreaLabel.Position = [251 56 35 22];
+            app.ErrorTextAreaLabel.Text = 'Error';
+
+            % Create ErrorTextArea
+            app.ErrorTextArea = uitextarea(app.UIFigure);
+            app.ErrorTextArea.Editable = 'off';
+            app.ErrorTextArea.Position = [300 20 217 60];
+
+            % Create ChoosestoppingcriteriaDropDownLabel
+            app.ChoosestoppingcriteriaDropDownLabel = uilabel(app.UIFigure);
+            app.ChoosestoppingcriteriaDropDownLabel.HorizontalAlignment = 'right';
+            app.ChoosestoppingcriteriaDropDownLabel.Position = [241 257 137 22];
+            app.ChoosestoppingcriteriaDropDownLabel.Text = 'Choose stopping criteria';
+
+            % Create ChoosestoppingcriteriaDropDown
+            app.ChoosestoppingcriteriaDropDown = uidropdown(app.UIFigure);
+            app.ChoosestoppingcriteriaDropDown.Items = {'Mean absolute Error', 'Root mean square Error'};
+            app.ChoosestoppingcriteriaDropDown.ValueChangedFcn = createCallbackFcn(app, @ChoosestoppingcriteriaDropDownValueChanged, true);
+            app.ChoosestoppingcriteriaDropDown.Position = [410 257 133 22];
+            app.ChoosestoppingcriteriaDropDown.Value = 'Mean absolute Error';
+
+            % Create OnlyforIterativeMethodsLabel
+            app.OnlyforIterativeMethodsLabel = uilabel(app.UIFigure);
+            app.OnlyforIterativeMethodsLabel.HorizontalAlignment = 'center';
+            app.OnlyforIterativeMethodsLabel.FontColor = [1 0 0];
+            app.OnlyforIterativeMethodsLabel.Position = [312 361 177 22];
+            app.OnlyforIterativeMethodsLabel.Text = 'Only for Iterative Methods:';
+
+            % Create EntertolerancethresholdEditFieldLabel
+            app.EntertolerancethresholdEditFieldLabel = uilabel(app.UIFigure);
+            app.EntertolerancethresholdEditFieldLabel.HorizontalAlignment = 'right';
+            app.EntertolerancethresholdEditFieldLabel.Position = [251 295 144 22];
+            app.EntertolerancethresholdEditFieldLabel.Text = 'Enter tolerance threshold';
+
+            % Create EntertolerancethresholdEditField
+            app.EntertolerancethresholdEditField = uieditfield(app.UIFigure, 'numeric');
+            app.EntertolerancethresholdEditField.Position = [414 295 125 22];
+
+            % Create EnterstartingapproximationEditFieldLabel
+            app.EnterstartingapproximationEditFieldLabel = uilabel(app.UIFigure);
+            app.EnterstartingapproximationEditFieldLabel.HorizontalAlignment = 'right';
+            app.EnterstartingapproximationEditFieldLabel.Position = [251 332 158 22];
+            app.EnterstartingapproximationEditFieldLabel.Text = 'Enter starting approximation';
+
+            % Create EnterstartingapproximationEditField
+            app.EnterstartingapproximationEditField = uieditfield(app.UIFigure, 'text');
+            app.EnterstartingapproximationEditField.Position = [414 332 125 22];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = CourseProject2
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
