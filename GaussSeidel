@@ -1,57 +1,60 @@
-function [output] = GaussSeidel(A,x,tolerance,flag)
-A = str2num(A);
-x = str2num(x);
+function [output] = GS(a,starting_value,tolerance,flag)
+%We all had to convert the gui input from string to numerical value
+a = str2num(a);
+starting_value = str2num(starting_value);
 
-[n,m] = size(A);
-matrix = A;
-matrix(:,end)=[];
+[n,m] = size(a);
+b = a(:,m); 
 
-b = A(:,m); 
-bias=b;
+matrix = a;
+matrix(:,end)=[]; 
+bias=b; 
 
 for i=1 : n
-    b(i) = b(i)/A(i,i);
+    b(i)=b(i)/a(i,i);
+    x(i)=starting_value(i);
     old_x(i) = x(i);
     for j=1 : n
         if (i~=j)
-            A(i,j)=A(i,j)/A(i,i);
-        end
-    end
-end
-error = 10;
-while error>tolerance
+            a(i,j)=a(i,j)/a(i,i);
+        end 
+    end 
+end 
+
+error=10; 
+
+while (error>tolerance)
     error=0;
     if flag == 1
-    	for i=1 : n
-        	x(i)=b(i);
+        for i=1 : n
+            x(i)=b(i);
             for j=1 : n
-            	if (i~=j)
-                    x(i)=x(i)-A(i,j) * x(j);
-                end
-            end
-            error = error+abs(x(i) - old_x(i)); %mean absolute error
+                if (i~=j)
+                    x(i)=x(i)-a(i,j)*x(j);
+                end 
+            end 
+            error=error+abs(x(i) - old_x(i)); 
             old_x(i)=x(i);
-        end
-        error=error/n; %mean absolute error
-    
-    elseif flag == 2
-    	for i=1 : n
-        	x(i)=b(i);
-            for j=1 : n
-            	if (i~=j)
-                	x(i)=x(i)-A(i,j) * x(j);
-                end
-            end
-            error = (error+(x(i) - old_x(i)))^2; %root mean square error
-            old_x(i)=x(i);
-        end
-        error=sqrt(error/n); %root mean square error
+        end 
+        error=error/n; 
     else
-        break
+        for i=1 : n
+            x(i)=b(i);
+            for j=1 : n
+                if (i~=j)
+                    x(i)=x(i)-a(i,j)*x(j);
+                end 
+            end 
+            error=(error+abs(x(i) - old_x(i)))^2; 
+            old_x(i)=x(i);
+        end 
+        error=sqrt(error/n); 
     end
-end
+end 
 x = round(x,4);
 
+%We did the true mean error as a group so the code is the same in all
+%functions
 sum=0;
 left=0;
 biases=0;
