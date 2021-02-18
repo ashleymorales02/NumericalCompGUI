@@ -1,0 +1,25 @@
+function [result] = isDiagonallyDominant(A)
+%We all had to convert the gui input from string to numerical value
+A = str2num(A);
+result = 1; % Boolean True
+sum=0;
+[m,n] = size(A);
+
+notDom=0;
+for row = 1: m
+    sum = 0;
+    for column = 1: m
+        if column ~= row
+            value = abs(A(row, column));
+            sum  = sum + value;
+        end
+    end
+    
+    if abs(A(row, row)) < sum
+        notDom=notDom+1;
+    end
+end
+
+if notDom == m %must be true for all rows
+    result = 0;
+end
