@@ -1,0 +1,69 @@
+function [output] = GaussSeidel(A,x,tolerance,flag)
+A = str2num(A);
+x = str2num(x);
+
+[n,m] = size(A);
+matrix = A;
+matrix(:,end)=[];
+
+b = A(:,m); 
+bias=b;
+
+for i=1 : n
+    b(i) = b(i)/A(i,i);
+    old_x(i) = x(i);
+    for j=1 : n
+        if (i~=j)
+            A(i,j)=A(i,j)/A(i,i);
+        end
+    end
+end
+error = 10;
+while error>tolerance
+    error=0;
+    if flag == 1
+    	for i=1 : n
+        	x(i)=b(i);
+            for j=1 : n
+            	if (i~=j)
+                    x(i)=x(i)-A(i,j) * x(j);
+                end
+            end
+            error = error+abs(x(i) - old_x(i)); %mean absolute error
+            old_x(i)=x(i);
+        end
+        error=error/n; %mean absolute error
+    
+    elseif flag == 2
+    	for i=1 : n
+        	x(i)=b(i);
+            for j=1 : n
+            	if (i~=j)
+                	x(i)=x(i)-A(i,j) * x(j);
+                end
+            end
+            error = (error+(x(i) - old_x(i)))^2; %root mean square error
+            old_x(i)=x(i);
+        end
+        error=sqrt(error/n); %root mean square error
+    else
+        break
+    end
+end
+x = round(x,4);
+
+sum=0;
+left=0;
+biases=0;
+for i = 1 :n
+    for j=1 : n
+        left = matrix(i,j) * x(j) + left;
+    end
+    right = bias(i);
+    biases = abs(left-right);
+    sum = sum + biases;
+    left = 0;
+    biases = 0;
+end
+MTE = (1/n)*sum;
+output = [x MTE];
